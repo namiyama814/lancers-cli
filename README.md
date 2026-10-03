@@ -1,6 +1,9 @@
 # lancers-cli
 
-ランサーズの公開案件をターミナルから検索・確認する TypeScript CLI です。
+ランサーズの公開案件を検索・確認する TypeScript ツールです。
+
+- **CLI**: ターミナルから案件検索・詳細表示
+- **MCP (Cloudflare Workers)**: AI クライアント向けのリモート MCP サーバー
 
 公式の第三者向け API はないため、公開の検索ページと案件詳細ページを取得してパースします。ログインや応募操作には対応していません。
 
@@ -13,15 +16,17 @@
 ```bash
 npm install
 npm run build
+npm run types   # Workers 用型生成（初回・wrangler 変更後）
 ```
 
-開発時はビルドなしで実行できます。
+## CLI
 
 ```bash
 npm run dev -- search TypeScript
+npm run dev -- show 5610630 --json
 ```
 
-## 使い方
+### 使い方
 
 ```bash
 # 案件検索
@@ -86,14 +91,49 @@ npm link   # 任意: `lancers` コマンドを PATH に追加
 | `proposal` | 提案数が多い順 |
 | `proposal_asc` | 提案数が少ない順 |
 
-### 取得できる情報
+## MCP サーバー (Cloudflare Workers)
 
-- `search`: ID / タイトル / 種別 / カテゴリ / 予算 / 当選者数・募集人数 / URL
-- `search` ページ情報: 現在ページ / 総ページ / 総件数 / 次・前ページ有無
-- `show`: タイトル / 業種 / 予算 / 募集期間 / 提案数 / 依頼概要 / URL
+Agents SDK の `createMcpHandler` によるステートレス MCP サーバーです。エンドポイントは `/mcp`。
+
+### 公開ツール
+
+| Tool | 説明 |
+| --- | --- |
+| `search_jobs` | 案件検索（keyword / type / category / budget / page など） |
+| `get_job_detail` | 案件詳細（work ID または URL） |
+
+### ローカル起動
+
+```bash
+npm run types
+npm run dev:worker
+```
+
+- ヘルス: `http://127.0.0.1:8787/`
+- MCP: `http://127.0.0.1:8787/mcp`
+
+### デプロイ
+
+```bash
+npm run deploy
+```
+
+デプロイ後の MCP URL 例:
+
+```text
+https://lancers-mcp.<your-subdomain>.workers.dev/mcp
+```
+
+Cursor などの MCP クライアントには、上記 URL を Streamable HTTP エンドポイントとして登録します。
+
+## 取得できる情報
+
+- `search` / `search_jobs`: ID / タイトル / 種別 / カテゴリ / 予算 / 当選者数・募集人数 / URL
+- ページ情報: 現在ページ / 総ページ / 総件数 / 次・前ページ有無
+- `show` / `get_job_detail`: タイトル / 業種 / 予算 / 募集期間 / 提案数 / 依頼概要 / URL
 - 検索結果から「募集終了」は除外します（総件数はサイト表示値）
 
-`--json` の検索結果は次の形です。
+`--json` / MCP の検索結果は次の形です。
 
 ```json
 {
@@ -114,3 +154,4 @@ npm link   # 任意: `lancers` コマンドを PATH に追加
 
 - 公開ページの HTML を参照する非公式クライアントです。ランサーズの利用規約を確認し、過度な連続リクエストは避けてください。
 - サイトの HTML 構造が変わるとパースに失敗する場合があります。
+- MCP エンドポイントは現状認証なしです。公開前に必要なら Cloudflare Access や OAuth を検討してください。
