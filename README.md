@@ -94,6 +94,7 @@ npm link   # 任意: `lancers` コマンドを PATH に追加
 ## MCP サーバー (Cloudflare Workers)
 
 Agents SDK の `createMcpHandler` によるステートレス MCP サーバーです。エンドポイントは `/mcp`。
+Worker は Lancers への取得を安定させるため、Cloudflare の配置ヒントで東京近辺のリージョンに配置します。
 
 ### 公開ツール
 
@@ -118,13 +119,17 @@ npm run dev:worker
 npm run deploy
 ```
 
-デプロイ後の MCP URL 例:
+デプロイ済みの MCP URL:
 
 ```text
-https://lancers-mcp.<your-subdomain>.workers.dev/mcp
+https://lancers-mcp.namiyama814.workers.dev/mcp
 ```
 
 Cursor などの MCP クライアントには、上記 URL を Streamable HTTP エンドポイントとして登録します。
+
+ChatGPT で使う場合は開発者モードを有効にし、ChatGPT Plugins で公開 HTTPS URL の `/mcp` までを接続先に登録してください。新しい会話でその接続を選択してから検索を依頼します。認証設定は不要です。
+
+`/mcp` をブラウザで直接開くと GET リクエストになり、`405 Method Not Allowed` が返ります。これはステートレス MCP の仕様です。MCP クライアントは同じ URL に POST で接続し、`search_jobs` を呼び出します。
 
 ## 取得できる情報
 
@@ -154,4 +159,4 @@ Cursor などの MCP クライアントには、上記 URL を Streamable HTTP �
 
 - 公開ページの HTML を参照する非公式クライアントです。ランサーズの利用規約を確認し、過度な連続リクエストは避けてください。
 - サイトの HTML 構造が変わるとパースに失敗する場合があります。
-- MCP エンドポイントは現状認証なしです。公開前に必要なら Cloudflare Access や OAuth を検討してください。
+- MCP エンドポイントは認証なしで公開しています。URL を知っている人は誰でも検索・詳細取得ツールを利用できます。

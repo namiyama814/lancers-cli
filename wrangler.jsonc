@@ -1,9 +1,14 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "lancers-mcp",
+  "account_id": "2a1ab8b6a9b36f7f0c4292dce044e0c4",
   "main": "src/worker.ts",
   "compatibility_date": "2026-10-03",
   "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "placement": {
+    "region": "aws:ap-northeast-1"
+  },
   "observability": {
     "enabled": true,
     "traces": {

@@ -28,6 +28,14 @@ export async function fetchHtml(pathOrUrl: string): Promise<string> {
   const response = await fetch(url, { headers: DEFAULT_HEADERS });
 
   if (!response.ok) {
+    console.warn("Lancers upstream HTTP error", {
+      method: "GET",
+      path: new URL(url).pathname,
+      status: response.status,
+      server: response.headers.get("server"),
+      cfRay: response.headers.get("cf-ray"),
+      allow: response.headers.get("allow"),
+    });
     throw new LancersHttpError(
       `Failed to fetch ${url}: ${response.status} ${response.statusText}`,
       response.status,
